@@ -1,0 +1,19 @@
+# Development Dockerfile - optimized for development workflow
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Start development server with hot reload
+CMD ["npm", "run", "dev"]
