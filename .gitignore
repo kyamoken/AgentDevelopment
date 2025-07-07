@@ -1,0 +1,119 @@
+# .gitignore
+# AI Agent Development プロジェクト用
+
+# === 環境設定ファイル ===
+.env
+.env.local
+.env.production
+.env.staging
+
+# === 依存関係・ビルド成果物 ===
+node_modules/
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# === ログファイル ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === 一時ファイル ===
+tmp/
+temp/
+*.tmp
+*.temp
+.cache/
+
+# === アップロードファイル ===
+uploads/
+static/uploads/
+
+# === データベース ===
+*.db
+*.sqlite
+*.sqlite3
+
+# === バックアップファイル ===
+backups/
+*.backup
+*.bak
+
+# === IDE・エディタ ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === OS生成ファイル ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# === Python固有 ===
+venv/
+env/
+ENV/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# === Node.js固有 ===
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity
+.pnp/
+.pnp.js
+
+# === 出力ファイル ===
+output/
+reports/
+coverage/
+*.csv
+*.xlsx
+*.pdf
+analysis_results.json
+
+# === Docker ===
+docker-compose.override.yml
+
+# === セキュリティ ===
+*.key
+*.pem
+*.p12
+secrets/
+
+# === 設定ファイル（ローカル） ===
+config/local.json
+config/development.json
+config/production.json
+
+# === テスト関連 ===
+.nyc_output/
+test-results/
+screenshots/
+
+# === その他 ===
+.env.backup*
+*.orig
