@@ -9,7 +9,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "echo \"Add ESLint configuration if needed\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/database.ts",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/config/database.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/database.ts"
   },
   "keywords": [
     "chat",

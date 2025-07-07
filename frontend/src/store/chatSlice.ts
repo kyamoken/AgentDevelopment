@@ -26,15 +26,15 @@ const chatSlice = createSlice({
     setActiveConversation: (state, action: PayloadAction<string | null>) => {
       state.activeConversation = action.payload;
     },
-    addMessage: (state, action: PayloadAction<Message>) => {
-      const message = action.payload;
-      const conversationId = message.conversation_id;
+    addMessage: (state, action: PayloadAction<{ conversationId: string; message: Message }>) => {
+      const { conversationId, message } = action.payload;
       
       if (!state.messages[conversationId]) {
         state.messages[conversationId] = [];
       }
       
-      state.messages[conversationId].push(message);
+      // Add to the beginning of the array since we're using inverted FlatList
+      state.messages[conversationId].unshift(message);
     },
     setMessages: (state, action: PayloadAction<{ conversationId: string; messages: Message[] }>) => {
       const { conversationId, messages } = action.payload;

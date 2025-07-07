@@ -12,9 +12,9 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'realtime_chat',
   synchronize: process.env.NODE_ENV === 'development',
   logging: process.env.NODE_ENV === 'development',
-  entities: ['src/models/**/*.ts'],
-  migrations: ['src/migrations/**/*.ts'],
-  subscribers: ['src/subscribers/**/*.ts'],
+  entities: [__dirname + '/../models/**/*.{ts,js}'],
+  migrations: [__dirname + '/../migrations/**/*.{ts,js}'],
+  subscribers: [__dirname + '/../subscribers/**/*.{ts,js}'],
 });
 
 export const initializeDatabase = async (): Promise<void> => {

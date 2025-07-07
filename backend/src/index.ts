@@ -7,6 +7,8 @@ import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database';
 import { setupSocketIO } from './services/socketService';
 import { logger } from './utils/logger';
+import authRoutes from './routes/auth';
+import chatRoutes from './routes/chat';
 
 // Load environment variables
 dotenv.config();
@@ -41,7 +43,11 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
-app.use('/api', (req, res) => {
+app.use('/api/auth', authRoutes);
+app.use('/api/chat', chatRoutes);
+
+// Legacy API route
+app.get('/api', (req, res) => {
   res.status(200).json({ 
     message: 'Chat API is running',
     version: '1.0.0'

@@ -1,10 +1,18 @@
 import { io, Socket } from 'socket.io-client';
 import { store } from '../store';
 import { addMessage, setConnected, addTypingUser, removeTypingUser } from '../store/chatSlice';
+import { Message } from '../types';
+
+interface SendMessageData {
+  conversationId: string;
+  content: string;
+  type?: 'text' | 'image' | 'file';
+}
 
 class SocketService {
   private socket: Socket | null = null;
   private readonly serverUrl = 'http://localhost:3000';
+  private messageHandlers: Array<(message: Message) => void> = [];
 
   connect(token: string): void {
     if (this.socket?.connected) {
@@ -42,16 +50,34 @@ class SocketService {
       store.dispatch(setConnected(false));
     });
 
-    this.socket.on('new_message', (message) => {
-      store.dispatch(addMessage(message));
+    this.socket.on('new_message', (message: Message) => {
+      store.dispatch(addMessage({ 
+        conversationId: message.conversation_id, 
+        message 
+      }));
+      
+      // Notify additional handlers
+      this.messageHandlers.forEach(handler => handler(message));
     });
 
-    this.socket.on('user_typing', ({ userId, conversationId }) => {
+    this.socket.on('user_typing', ({ userId, conversationId, username }) => {
       store.dispatch(addTypingUser({ conversationId, userId }));
     });
 
-    this.socket.on('user_stopped_typing', ({ userId, conversationId }) => {
+    this.socket.on('user_stopped_typing', ({ userId, conversationId, username }) => {
       store.dispatch(removeTypingUser({ conversationId, userId }));
+    });
+
+    this.socket.on('user_joined', ({ userId, username, conversationId }) => {
+      console.log(`${username} joined conversation ${conversationId}`);
+    });
+
+    this.socket.on('user_left', ({ userId, username, conversationId }) => {
+      console.log(`${username} left conversation ${conversationId}`);
+    });
+
+    this.socket.on('user_status_update', ({ userId, username, status }) => {
+      console.log(`${username} status updated to ${status}`);
     });
 
     this.socket.on('error', (error) => {
@@ -67,12 +93,8 @@ class SocketService {
     this.socket?.emit('leave_conversation', conversationId);
   }
 
-  sendMessage(conversationId: string, content: string, type = 'text'): void {
-    this.socket?.emit('send_message', {
-      conversationId,
-      content,
-      type,
-    });
+  sendMessage(data: SendMessageData): void {
+    this.socket?.emit('send_message', data);
   }
 
   startTyping(conversationId: string): void {
@@ -81,6 +103,18 @@ class SocketService {
 
   stopTyping(conversationId: string): void {
     this.socket?.emit('typing_stop', conversationId);
+  }
+
+  updateStatus(status: 'online' | 'away' | 'busy'): void {
+    this.socket?.emit('update_status', status);
+  }
+
+  onNewMessage(handler: (message: Message) => void): void {
+    this.messageHandlers.push(handler);
+  }
+
+  offNewMessage(handler: (message: Message) => void): void {
+    this.messageHandlers = this.messageHandlers.filter(h => h !== handler);
   }
 
   isConnected(): boolean {

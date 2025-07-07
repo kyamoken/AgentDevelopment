@@ -1,4 +1,5 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -12,11 +13,14 @@ export const apiClient = axios.create({
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
-  (config) => {
-    // TODO: Get token from storage
-    const token = null; // AsyncStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('Error getting token from storage:', error);
     }
     return config;
   },
@@ -28,10 +32,25 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
       // Handle token expiration
-      // TODO: Redirect to login or refresh token
+      try {
+        const refreshToken = await AsyncStorage.getItem('refreshToken');
+        if (refreshToken) {
+          const response = await authAPI.refreshToken(refreshToken);
+          const { token } = response.data;
+          await AsyncStorage.setItem('token', token);
+          
+          // Retry original request
+          error.config.headers.Authorization = `Bearer ${token}`;
+          return apiClient.request(error.config);
+        }
+      } catch (refreshError) {
+        // Refresh failed, clear tokens and redirect to login
+        await AsyncStorage.multiRemove(['token', 'refreshToken']);
+        // Note: In a real app, you'd dispatch a logout action here
+      }
     }
     return Promise.reject(error);
   }
@@ -49,17 +68,45 @@ export const authAPI = {
   
   logout: () =>
     apiClient.post('/auth/logout'),
+
+  getProfile: () =>
+    apiClient.get('/auth/profile'),
 };
 
 export const chatAPI = {
   getConversations: () =>
-    apiClient.get('/conversations'),
+    apiClient.get('/chat/conversations'),
   
   getMessages: (conversationId: string, page = 1, limit = 50) =>
-    apiClient.get(`/conversations/${conversationId}/messages`, {
+    apiClient.get(`/chat/conversations/${conversationId}/messages`, {
       params: { page, limit }
     }),
   
   createConversation: (participantIds: string[], title?: string) =>
-    apiClient.post('/conversations', { participantIds, title }),
+    apiClient.post('/chat/conversations', { participantIds, title }),
+
+  sendMessage: (conversationId: string, data: { content: string; type?: string }) =>
+    apiClient.post(`/chat/conversations/${conversationId}/messages`, data),
+};
+
+// Token management utilities
+export const tokenStorage = {
+  setTokens: async (token: string, refreshToken: string) => {
+    await AsyncStorage.multiSet([
+      ['token', token],
+      ['refreshToken', refreshToken]
+    ]);
+  },
+
+  getToken: async () => {
+    return await AsyncStorage.getItem('token');
+  },
+
+  getRefreshToken: async () => {
+    return await AsyncStorage.getItem('refreshToken');
+  },
+
+  clearTokens: async () => {
+    await AsyncStorage.multiRemove(['token', 'refreshToken']);
+  },
 };
