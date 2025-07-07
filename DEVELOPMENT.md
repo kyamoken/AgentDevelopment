@@ -69,6 +69,30 @@ This document provides step-by-step instructions for setting up the development 
    npm start
    ```
 
+## Modern Docker Setup
+
+### Development vs Production Configurations
+
+**Development Setup:**
+- Uses `Dockerfile.dev` for faster development workflow
+- Includes hot reload with nodemon
+- Volume mounts for live code changes
+- Detailed logging for debugging
+
+**Production Setup:**
+- Multi-stage build for optimized image size  
+- Security hardening with non-root user
+- Health checks for container monitoring
+- Minimal runtime dependencies
+
+### New Features
+
+1. **Optimized Build Process**: Multi-stage Docker builds reduce image size
+2. **Health Checks**: Built-in health monitoring for all services
+3. **Security**: Non-root user execution in production
+4. **Modern Docker Compose**: Removed deprecated fields, added dependency conditions
+5. **Database Initialization**: Proper SQL initialization with extensions
+
 ## Testing the Setup
 
 ### Backend Tests
@@ -130,13 +154,35 @@ curl http://localhost:3000/health
    npm install
    ```
 
-4. **Docker Issues**
-   ```bash
-   # Rebuild containers
-   docker-compose -f docker-compose.dev.yml down
-   docker-compose -f docker-compose.dev.yml build --no-cache
-   docker-compose -f docker-compose.dev.yml up -d
-   ```
+### Docker Issues
+
+**Previous Issues (Now Fixed):**
+- Missing SQL initialization file causing container startup failures
+- Inefficient Dockerfile causing long build times  
+- Docker Compose using deprecated version field
+- Backend container not starting due to missing dependencies
+
+**Current Implementation:**
+```bash
+# Development Environment (Optimized)
+docker compose -f docker-compose.dev.yml up -d
+
+# Check service status
+docker compose -f docker-compose.dev.yml ps
+
+# Test backend API  
+curl http://localhost/health
+curl http://localhost/api/
+
+# Run tests in Docker
+docker compose -f docker-compose.dev.yml exec backend npm test
+
+# View logs
+docker compose -f docker-compose.dev.yml logs -f backend
+
+# Production Environment
+docker compose -f docker-compose.prod.yml up -d
+```
 
 ### Development Tips
 
