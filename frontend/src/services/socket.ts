@@ -2,6 +2,7 @@ import { io, Socket } from 'socket.io-client';
 import { store } from '../store';
 import { addMessage, setConnected, addTypingUser, removeTypingUser } from '../store/chatSlice';
 import { Message } from '../types';
+import { getSocketUrl } from '../config/environment';
 
 interface SendMessageData {
   conversationId: string;
@@ -11,7 +12,7 @@ interface SendMessageData {
 
 class SocketService {
   private socket: Socket | null = null;
-  private readonly serverUrl = 'http://localhost:3000';
+  private readonly serverUrl = getSocketUrl();
   private messageHandlers: Array<(message: Message) => void> = [];
 
   connect(token: string): void {

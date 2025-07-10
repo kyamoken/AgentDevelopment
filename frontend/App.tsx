@@ -7,6 +7,7 @@ import { store, RootState } from './src/store';
 import { loginSuccess } from './src/store/authSlice';
 import { tokenStorage } from './src/services/api';
 import { socketService } from './src/services/socket';
+import { logEnvironmentInfo } from './src/config/environment';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import ConversationListScreen from './src/screens/ChatScreen'; // Renamed
@@ -79,6 +80,8 @@ const AppContent: React.FC = () => {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
+    // 環境情報をログ出力
+    logEnvironmentInfo();
     initializeAuth();
   }, []);
 
